@@ -1,0 +1,109 @@
+﻿@page "/product/edit/{productId:int}"
+@using Logic
+@inject IProductLogic _productLogic
+@inject NavigationManager _navigationManager
+<PageTitle>@Title</PageTitle>
+
+<h3>@Title</h3>
+<a href="/products" class="btn btn-outline-dark" @onclick="BackToProducts">Show All</a>
+<div class="row">
+    <div class="col-md-6">
+        <EditForm Model="@product" OnValidSubmit="Save">
+            <DataAnnotationsValidator />
+
+            <div class="form-group">
+                <label for="Name">Name</label>
+                <InputText class="form-control" @bind-Value="product.Name" />
+                <ValidationMessage For="@(()=>product.Name)" />
+            </div>
+
+            <div class="form-group">
+                <label for="Price">Price</label>
+                <InputNumber class="form-control" @bind-Value="product.Price" />
+                <ValidationMessage For="@(()=>product.Price)" />
+            </div>
+
+            <div class="form-group">
+                <label for="ManufactureDate">ManufactureDate</label>
+                <InputDate class="form-control" @bind-Value="product.ManufactureDate" />
+                <ValidationMessage For="@(()=>product.ManufactureDate)" />
+            </div>
+
+            <div class="form-group">
+                <label for="IsAvailable">Available</label>
+                <InputRadioGroup @bind-Value="product.IsAvailable">
+                    <InputRadio id="availableTrue" Value="true" />
+                    <label for="availableTrue">Yes</label>
+                    <InputRadio id="availableFalse" Value="false" />
+                    <label for="availableFalse">No</label>
+                </InputRadioGroup>
+                <ValidationMessage For="@(()=>product.IsAvailable)" />
+            </div>
+
+            <div class="form-group">
+                <label for="StockCount">StockCount</label>
+                <InputNumber class="form-control" @bind-Value="product.StockCount" />
+                <ValidationMessage For="@(()=>product.StockCount)" />
+            </div>
+
+            <div class="my-2">
+                @message
+            </div>
+
+            @if (product.Name == null || product.Price == 0 || string.IsNullOrWhiteSpace(product.Price.ToString()) || product.ManufactureDate == default(DateTime) ||
+                 product.StockCount == 0 || string.IsNullOrWhiteSpace(product.StockCount.ToString()))
+            {
+                <div class="my-2">
+                    <button type="submit" class="btn btn-primary" disabled="true">Save</button>
+                </div>
+            }
+            else
+            {
+                <div class="my-2">
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            }
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int ProductId { get; set; }
+    private string message = string.Empty;
+    Model.Product product = new();
+    private string Title = "Update Product";
+    private List<Model.Product> products = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        product = _productLogic.ReadProduct(ProductId).Result.Data;
+        if (product == null)
+        {
+            _navigationManager.NavigateTo("/products", forceLoad: true);
+        }
+    }
+
+    private async Task BackToProducts()
+    {
+        _navigationManager.NavigateTo("/products", forceLoad: true);
+    }
+
+    private async Task Save()
+    {
+        message = "wait...";
+        var response = await _productLogic.UpdateProduct(product);
+        if (response.IsSuccess)
+        {
+            message = "Sucessfully updated";
+            product = new Model.Product();
+            _navigationManager.NavigateTo("/products");
+        }
+        else
+        {
+            message = response.ErrorMessage;
+        }
+
+    }
+
+}

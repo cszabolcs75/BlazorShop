@@ -1,0 +1,69 @@
+﻿@page "/products"
+@using Logic
+@inject IProductLogic productLogic
+@inject IJSRuntime jsRuntime
+@inject NavigationManager _navigationManager
+<ConfirmDialog @ref="dialog" />
+
+<h3>Products</h3>
+<a href="/product/add" class="btn btn-outline-dark my-2">Add more</a>
+<div class="row">
+    <div class="col-md-6">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Price</th>
+                    <th>ManufactureDate</th>
+                    <th>Available</th>
+                    <th>StockCount</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var product in products)
+                {
+                    <tr>
+                        <td>@product.Name</td>
+                        <td>@product.Price</td>
+                        <td>@product.ManufactureDate</td>
+                        <td>@product.IsAvailable</td>
+                        <td>@product.StockCount</td>
+                        <td>
+                            <a href="/product/edit/@product.Id" class="btn btn-success">Edit</a>
+                            <Button Color="ButtonColor.Danger" @onclick="@(async () => await ShowDeleteConfirmationAsync(product.Id))"> Delete </Button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@code {
+    private List<Model.Product> products = new();
+
+
+    private ConfirmDialog dialog = default!;
+
+    private async Task ShowDeleteConfirmationAsync(int id)
+    {
+        var confirmation = await dialog.ShowAsync(
+            title: "Are you sure you want to delete this?",
+            message1: "This will delete the record. Once deleted can not be rolled back.",
+            message2: "Do you want to proceed?");
+
+        if (confirmation)
+        {
+            productLogic.DeleteProduct(id);
+            _navigationManager.NavigateTo("/products", forceLoad: true);
+        }
+    }
+
+    
+
+    protected override void OnInitialized()
+    {
+        products = productLogic.ReadAllProduct().ToList();
+        base.OnInitialized();
+    }
+}
