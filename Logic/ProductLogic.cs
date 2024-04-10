@@ -59,8 +59,17 @@ namespace Logic
             product.Validate();
             await ReadProduct(product.Id);
 
-            var updatedProduct = await _productRepository.UpdateProduct(product);
-            return Result<Product>.Success(updatedProduct);
+            var existingName = _productRepository.GetAll().FirstOrDefault(x => x.Name == product.Name);
+
+            if (existingName != null)
+            {
+                return Result<Product>.Fail("There is a product with that name!");
+            }
+            else
+            {
+                var updatedProduct = await _productRepository.UpdateProduct(product);
+                return Result<Product>.Success(updatedProduct);
+            }       
             
         }
     }
