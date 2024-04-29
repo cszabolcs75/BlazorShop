@@ -49,7 +49,7 @@
             <div class="my-2">
                 @message
             </div>
-            @if (product.Name == null || product.Price == 0 || string.IsNullOrWhiteSpace(product.Price.ToString()) || product.ManufactureDate == default(DateTime) ||
+            @if (product.Name == null || product.Price <= 0 || string.IsNullOrWhiteSpace(product.Price.ToString()) || product.ManufactureDate == default(DateTime) ||
                  product.StockCount == 0 || string.IsNullOrWhiteSpace(product.StockCount.ToString()))
             {
                 <div class="my-2">

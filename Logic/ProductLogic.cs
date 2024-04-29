@@ -1,5 +1,7 @@
 ﻿using Model;
 using Repository;
+using System.Diagnostics;
+using System.Xml.Linq;
 
 namespace Logic
 {
@@ -14,7 +16,11 @@ namespace Logic
 
         public async Task<Result<Product>> CreateProduct(Product product)
         {
-            product.Validate();
+            var validationResult = await product.Validate();
+            if (!validationResult.IsSuccess)
+            {
+                return validationResult;
+            }
 
             var existingName = _productRepository.GetAll().FirstOrDefault(x=> x.Name == product.Name);
 
@@ -56,10 +62,14 @@ namespace Logic
         }
         public async Task<Result<Product>> UpdateProduct(Product product)
         {
-            product.Validate();
+            var validationResult = await product.Validate();
+            if (!validationResult.IsSuccess)
+            {
+                return validationResult;
+            }
             await ReadProduct(product.Id);
 
-            var existingName = _productRepository.GetAll().FirstOrDefault(x => x.Name == product.Name);
+            var existingName = _productRepository.GetAll().FirstOrDefault(x => x.Name == product.Name && x.Id != product.Id);
 
             if (existingName != null)
             {

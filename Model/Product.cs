@@ -9,14 +9,22 @@
         public bool IsAvailable { get; set; }
         public int StockCount { get; set; }
 
-        public void Validate()
+        public async Task<Result<Product>> Validate()
         {
             if (string.IsNullOrEmpty(Name))
-                throw new ArgumentException("Product name cannot be null or empty");
+            {
+                return Result<Product>.Fail("Product name cannot be null or empty");
+            }
             if (Price <= 0)
-                throw new ArgumentException("Price must be greater than zero");
+            {
+                return Result<Product>.Fail("Price must be greater than zero");
+
+            }
             if (ManufactureDate == default(DateTime))
-                throw new ArgumentException("Manufacture date must be provided");
+            {
+                return Result<Product>.Fail("Manufacture date must be provided");
+            }
+            return null;
         }
     }
 }
